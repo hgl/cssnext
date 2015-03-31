@@ -21,6 +21,7 @@ program
   .option("-b, --browsers <items>", "browsers list (comma separated)")
   .option("-I, --no-import", "do not inline @import")
   .option("-U, --no-url", "do not adjust url()")
+  .option("-e, --extract", "output values of custom properties")
   .option("-c, --compress", "compress output")
   .option("-s, --sourcemap", "add sourcemap")
   .option("-w, --watch", "watch the input file for changes")
@@ -72,6 +73,7 @@ if ("url" in program) { config.url = program.url }
 if ("sourcemap" in program) { config.sourcemap = program.sourcemap }
 if ("compress" in program) { config.compress = program.compress }
 if ("watch" in program) { config.watch = program.watch }
+config.extract = program.extract
 
 var input = program.args[0] ? path.resolve(program.args[0]) : null
 var output = program.args[1] ? path.resolve(program.args[1]) : null

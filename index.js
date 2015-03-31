@@ -127,7 +127,15 @@ function cssnext(string, options) {
         )
       )
     ) {
-      postcss.use(cssnext.features[key](typeof features[key] === "object" ? features[key] : undefined))
+      var pluginOpts
+      if (typeof features[key] === "object") {
+        pluginOpts = features[key]
+      }
+      if (key === "customProperties" && options.extract) {
+        if (!pluginOpts) { pluginOpts = {} }
+        pluginOpts.preserve = true
+      }
+      postcss.use(cssnext.features[key](pluginOpts))
     }
   })
 
@@ -140,6 +148,22 @@ function cssnext(string, options) {
   // classic API if string is passed
   if (typeof string === "string") {
     var result = postcss.process(string, options)
+
+    if (options.extract) {
+      var props = {}
+      result.root.eachRule(function(rule) {
+        if (rule.selectors.length !== 1 || rule.selectors[0] !== ":root" || rule.parent.type !== "root") {
+          return
+        }
+        rule.each(function(decl) {
+          var name = decl.prop
+          if (name.slice(0, 2) !== "--") { return }
+          name = name.slice(2)
+          props[name] = decl.value
+        })
+      })
+      return JSON.stringify(props) + "\n"
+    }
 
     // default behavior, cssnext returns a css string if no or inline sourcemap
     if (options.map === null || (options.map === true || options.map.inline)) {

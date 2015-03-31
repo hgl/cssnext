@@ -88,6 +88,12 @@ test("cli", function(t) {
   })
   planned+=1
 
+  exec(cssnextBin + " --extract test/fixtures/extract.css", {cwd: process.cwd()}, function(err, stdout) {
+    if (err) { throw err }
+    t.equal(stdout, utils.readFixture("extract.expected", ".json"), "should extract custom properties on --extract")
+  })
+  planned+=1
+
   exec(cssnextBin + " --compress test/fixtures/compress.css", function(err, stdout) {
     if (err) { throw err }
     t.equal(stdout, utils.readFixture("compress.default.expected").trim(), "should compress on --compress")
