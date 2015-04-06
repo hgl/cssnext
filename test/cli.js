@@ -88,9 +88,9 @@ test("cli", function(t) {
   })
   planned+=1
 
-  exec(cssnextBin + " --extract test/fixtures/extract.css", {cwd: process.cwd()}, function(err, stdout) {
+  exec(cssnextBin + " --extract test/fixtures/extract.css --config test/fixtures/extract.json", {cwd: process.cwd()}, function(err, stdout) {
     if (err) { throw err }
-    t.equal(stdout, utils.readFixture("extract.expected", ".json"), "should extract custom properties on --extract")
+    t.deepEqual(JSON.parse(stdout), JSON.parse(utils.readFixture("extract.expected", ".json")), "should extract custom properties on --extract")
   })
   planned+=1
 

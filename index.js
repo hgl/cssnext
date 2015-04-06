@@ -131,10 +131,13 @@ function cssnext(string, options) {
       if (typeof features[key] === "object") {
         pluginOpts = features[key]
       }
-      if (key === "customProperties" && options.extract) {
-        if (!pluginOpts) { pluginOpts = {} }
-        pluginOpts.preserve = true
+      if (options.extract) {
+        if (key === "customProperties" || key === "customMedia") {
+          if (!pluginOpts) { pluginOpts = {} }
+          pluginOpts.append = true
+        }
       }
+
       postcss.use(cssnext.features[key](pluginOpts))
     }
   })
@@ -151,6 +154,8 @@ function cssnext(string, options) {
 
     if (options.extract) {
       var props = {}
+      var mqs = {}
+      var map = {}
       result.root.eachRule(function(rule) {
         if (rule.selectors.length !== 1 || rule.selectors[0] !== ":root" || rule.parent.type !== "root") {
           return
@@ -162,7 +167,21 @@ function cssnext(string, options) {
           props[name] = decl.value
         })
       })
-      return JSON.stringify(props) + "\n"
+      result.root.eachAtRule(function(atRule) {
+        if (atRule.name !== "custom-media") { return }
+        var params = atRule.params.split(" ")
+        var name = params.shift();
+        if (name.slice(0, 2) !== "--") { return }
+        name = name.slice(2)
+        mqs[name] = params.join(" ")
+      })
+      if (Object.keys(props).length) {
+        map.customProperties = props
+      }
+      if (Object.keys(mqs).length) {
+        map.customMedia = mqs;
+      }
+      return JSON.stringify(map) + "\n"
     }
 
     // default behavior, cssnext returns a css string if no or inline sourcemap
